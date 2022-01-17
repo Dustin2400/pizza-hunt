@@ -9,6 +9,26 @@ const $newCommentForm = document.querySelector('#new-comment-form');
 
 let pizzaId;
 
+function getPizza() {
+  const searchParams = new URLSearchParams(document.location.search.substring(1))
+  const pizzaId = searchParams.get('id');
+
+  fetch(`/api/pizzas/${pizzaId}`)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error({ message: 'Something went wrong!' });
+    }
+
+    return response.json();
+  })
+  .then(printPizza)
+  .catch(err => {
+    console.log(err);
+    alert('Cannot find a pizza with this id! Taking you back.');
+    window.history.back();
+  });
+}
+
 function printPizza(pizzaData) {
   console.log(pizzaData);
 
@@ -87,7 +107,24 @@ function handleNewCommentSubmit(event) {
   }
 
   const formData = { commentBody, writtenBy };
-}
+
+  fetch(`/api/comments/${pizzaId}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+    .then(response => response.json())
+    .then(commentResponse => {
+      console.log(commentResponse);
+      location.reload();
+    })
+    .catch(err => {
+      console.log(err);
+    })
+};
 
 function handleNewReplySubmit(event) {
   event.preventDefault();
@@ -106,7 +143,25 @@ function handleNewReplySubmit(event) {
   }
 
   const formData = { writtenBy, replyBody };
+
+  fetch(`/api/comments/${pizzaId}/${commentId}`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(commentResponse => {
+    console.log(commentResponse);
+    location.reload();
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
 }
+
 
 $backBtn.addEventListener('click', function() {
   window.history.back();
@@ -114,3 +169,5 @@ $backBtn.addEventListener('click', function() {
 
 $newCommentForm.addEventListener('submit', handleNewCommentSubmit);
 $commentSection.addEventListener('submit', handleNewReplySubmit);
+
+getPizza();
