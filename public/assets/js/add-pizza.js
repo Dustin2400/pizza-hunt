@@ -63,7 +63,7 @@ const handlePizzaSubmit = event => {
     .then(response => response.json())
     .then(postresponse => {
       alert('Pizza created successfully!');
-      console.log(postResponse);
+      console.log(postresponse);
     })
     .catch(err => {
       console.log(err);
